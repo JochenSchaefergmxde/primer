@@ -280,6 +280,11 @@ def is_likely_contaminant(org_name, blast_hit_title=""):
 
 def infer_tier(org_name, pair_id=""):
     """Infers pathogen tier classification: Tier 0 (Universal Barcoding), Tier 1 (Tick/vector-borne & co-infections), Tier 2 (Endocarditis/Sepsis), Tier 3 (Other)."""
+    org_lower = str(org_name).lower()
+    pair_lower = pair_id.lower()
+    if any(k in org_lower or k in pair_lower for k in ['amr', 'resistance', 'tetm', 'tetk', 'teta', 'ermb', 'erma', 'gyra', 'parc', 'blatem', 'blashv']):
+        return 'Tier AMR'
+
     name = (str(org_name) + " " + str(pair_id)).lower()
     t0_keywords = ['universal', 'pan-', 'pan_', 'broad-range', 'barcoding', 'tier 0', 'tier0']
     for k in t0_keywords:
@@ -2183,6 +2188,216 @@ def merge_search_results(res1, res2):
 
     return merged
 
+
+def generate_ai_medical_report_html(fastq_name, sample_prefix, total_reads, clinical_findings, blast_confirmed_matches, primer_stats, human_dna_pct=None):
+    """
+    Generates structured Clinical AI Medical Report & Diagnostic Epikrise based on SHG Borreliose Hannover guidelines.
+    """
+    confirmed = [f for f in clinical_findings if f.get("status") == "confirmed"]
+    suspect = [f for f in clinical_findings if f.get("status") == "suspect"]
+    low = [f for f in clinical_findings if f.get("status") == "low"]
+    
+    # Check AMR Assays
+    amr_hits = []
+    for pid, st in primer_stats.items():
+        if "amr" in pid.lower() or "amr" in str(st.get("Tier", "")).lower() or "tet" in pid.lower() or "erm" in pid.lower():
+            both = st.get("BOTH", st.get("both", 0))
+            fwd = st.get("ONLY_FORWARD", st.get("fwd", 0))
+            rev = st.get("ONLY_REVERSE", st.get("rev", 0))
+            if (both + fwd + rev) > 0:
+                amr_hits.append({
+                    "name": pid,
+                    "organism": st.get("Organism", pid),
+                    "gene": st.get("Target_Gene", st.get("TargetGene", "")),
+                    "both": both, "fwd": fwd, "rev": rev,
+                    "amp": both
+                })
+
+    # Coinfection Analysis across confirmed, suspect and low-level signals
+    detected_genera = {str(f.get("organism", "")).lower() for f in (confirmed + suspect + low) if (f.get("total_both", 0) > 0 or f.get("total_fwd", 0) > 0)}
+    has_borrelia = any("borrelia" in g for g in detected_genera)
+    has_babesia = any("babesia" in g for g in detected_genera)
+    has_bartonella = any("bartonella" in g for g in detected_genera)
+    has_rickettsia = any("rickettsia" in g or "anaplasma" in g or "ehrlichia" in g for g in detected_genera)
+    has_atypical = any("mycoplasma" in g or "mycobacterium" in g or "cryptococcus" in g or "herpes" in g for g in detected_genera)
+
+    # Findings rows
+    findings_rows = ""
+    for f in (confirmed + suspect):
+        badge_cls = "badge-both" if f.get("status") == "confirmed" else "badge-fwd"
+        status_lbl = "🟢 Bestaetigt" if f.get("status") == "confirmed" else "🟡 Verdacht"
+        both_c = f.get("total_both", f.get("both_hits", 0))
+        fwd_c = f.get("total_fwd", f.get("fwd_hits", 0))
+        rev_c = f.get("total_rev", f.get("rev_hits", 0))
+        org_name = f.get("organism", f.get("genus", "Unbekannt"))
+        desc = f.get("description", "Klinisch relevanter Befund")
+        findings_rows += f"""
+        <tr style="border-bottom:1px solid #334155;">
+            <td style="padding:10px 12px; font-weight:700; color:#f8fafc;">{org_name}</td>
+            <td style="padding:10px 12px;"><span class="badge {badge_cls}">{status_lbl}</span></td>
+            <td style="padding:10px 12px; font-family:monospace; color:#38bdf8;">{both_c} Both / {fwd_c} FWD / {rev_c} REV</td>
+            <td style="padding:10px 12px; color:#cbd5e1; font-size:13px;">{desc}</td>
+        </tr>
+        """
+    if not findings_rows:
+        findings_rows = '<tr><td colspan="4" style="padding:16px; text-align:center; color:var(--text-secondary);">Keine signifikanten Pathogen-Signale nachgewiesen.</td></tr>'
+
+    # Coinfection advice text
+    coinfection_alerts = []
+    if has_borrelia and has_babesia:
+        coinfection_alerts.append("""
+        <div style="background:rgba(239, 68, 68, 0.15); border-left:4px solid #ef4444; padding:12px 16px; border-radius:6px; margin-bottom:12px;">
+            <strong style="color:#f87171;">⚠️ Koinfektion: Borreliose + Piroplasmen (Babesiose)</strong>
+            <p style="margin:4px 0 0 0; font-size:13px; color:#cbd5e1;">
+                Gleichzeitiger Nachweis von <em>Borrelia</em> und <em>Babesia</em> (erythrozytäre Parasiten). Typisches klinisches Korrelat: Schwere therapieresistente Erschöpfung, nächtliche Schweißausbrüche (Drenching sweats), Belastungsdyspnoe ("Air Hunger") und Kopfschmerzen. 
+                <br><strong>Therapieweiser:</strong> Standard-Doxycyclin besitzt keine Wirksamkeit gegen Babesien. Leitliniengemäß wird eine Kombination aus Atovaquon + Azithromycin in Erwägung gezogen.
+            </p>
+        </div>
+        """)
+    if has_borrelia and has_bartonella:
+        coinfection_alerts.append("""
+        <div style="background:rgba(245, 158, 11, 0.15); border-left:4px solid #f59e0b; padding:12px 16px; border-radius:6px; margin-bottom:12px;">
+            <strong style="color:#fbbf24;">⚠️ Koinfektion: Borreliose + Bartonellose</strong>
+            <p style="margin:4px 0 0 0; font-size:13px; color:#cbd5e1;">
+                Bartonellen kolonisieren Gefäßendothelien und Erythrozyten. Typische Symptome: Brennende Fußsohlen- und Fersenschmerzen (besonders morgens), Schienbeinschmerzen, neuropsychiatrische Reizbarkeit, Angiogenese / Striae-artige Hauterscheinungen.
+            </p>
+        </div>
+        """)
+    if has_rickettsia:
+        coinfection_alerts.append("""
+        <div style="background:rgba(6, 182, 212, 0.15); border-left:4px solid #06b6d4; padding:12px 16px; border-radius:6px; margin-bottom:12px;">
+            <strong style="color:#22d3ee;">ℹ️ Intrazelluläre Koinfektion: Rickettsia / Anaplasma / Ehrlichia</strong>
+            <p style="margin:4px 0 0 0; font-size:13px; color:#cbd5e1;">
+                Befall von Granulozyten bzw. Endothelien. Häufig assoziiert mit akuten Fieberschüben, Leukozytopenie, Thrombozytopenie und Transaminasenerhöhung.
+            </p>
+        </div>
+        """)
+    if has_atypical:
+        coinfection_alerts.append("""
+        <div style="background:rgba(168, 85, 247, 0.15); border-left:4px solid #a855f7; padding:12px 16px; border-radius:6px; margin-bottom:12px;">
+            <strong style="color:#c084fc;">🔬 Opportunistische Keime &amp; Immundysfunktion</strong>
+            <p style="margin:4px 0 0 0; font-size:13px; color:#cbd5e1;">
+                Nachweis atypischer Keime (Mykoplasmen, NTM, <em>Cryptococcus</em> oder Herpesviren). Bei chronischer Borreliose häufig Ausdruck einer sekundären Erschöpfung des zellulären Immunsystems (T-Zell-Dysfunktion, verminderte CD57+ NK-Zellen).
+            </p>
+        </div>
+        """)
+    if not coinfection_alerts:
+        coinfection_alerts.append("""
+        <div style="background:rgba(16, 185, 129, 0.1); border-left:4px solid #10b981; padding:12px 16px; border-radius:6px; margin-bottom:12px;">
+            <strong style="color:#34d399;">✓ Keine komplexen Koinfektions-Kombinationen detektiert</strong>
+            <p style="margin:4px 0 0 0; font-size:13px; color:#cbd5e1;">Die nachgewiesenen Signale deuten auf eine Monoinfektion bzw. isolierte Erregerlast ohne typische Koinfektionssynergien hin.</p>
+        </div>
+        """)
+
+    # AMR rows
+    amr_section = ""
+    if amr_hits:
+        amr_rows = ""
+        for h in amr_hits:
+            amr_rows += f"""
+            <tr style="border-bottom:1px solid #334155;">
+                <td style="padding:8px 12px; font-weight:700; color:#fbbf24;">{h['organism']}</td>
+                <td style="padding:8px 12px; font-family:monospace; color:#38bdf8;">{h['name']}</td>
+                <td style="padding:8px 12px; color:#f8fafc;">{h['amp']} Amplikons ({h['both']} BOTH / {h['fwd']} FWD)</td>
+                <td style="padding:8px 12px; color:#cbd5e1; font-size:13px;">Resistenzmarker nachgewiesen</td>
+            </tr>
+            """
+        amr_section = f"""
+        <div style="background:rgba(245, 158, 11, 0.1); border:1px solid #f59e0b; padding:14px; border-radius:8px; margin-bottom:20px;">
+            <h4 style="margin:0 0 8px 0; color:#fbbf24;">⚠️ Detektierte Antibiotika-Resistenzgene (AMR):</h4>
+            <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                <thead>
+                    <tr style="border-bottom:2px solid #475569; text-align:left; color:#94a3b8;">
+                        <th style="padding:6px 12px;">Resistenzklasse</th>
+                        <th style="padding:6px 12px;">Assay / Gen</th>
+                        <th style="padding:6px 12px;">Treffer</th>
+                        <th style="padding:6px 12px;">Bewertung</th>
+                    </tr>
+                </thead>
+                <tbody>{amr_rows}</tbody>
+            </table>
+        </div>
+        """
+    else:
+        amr_section = """
+        <div style="background:rgba(16, 185, 129, 0.08); border:1px solid #10b981; padding:12px 16px; border-radius:8px; margin-bottom:20px;">
+            <strong style="color:#34d399;">✓ Kein Nachweis bekannter AMR-Resistenzgene</strong>
+            <p style="margin:4px 0 0 0; font-size:13px; color:#cbd5e1;">Im geprüften Panel (Doxycyclin tet, Makrolide erm, Chinolone gyrA, Beta-Laktame) wurden keine genetischen Resistenzdeterminanten detektiert.</p>
+        </div>
+        """
+
+    html = f"""
+    <div class="card" style="border-left: 4px solid #8b5cf6;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+            <div>
+                <h2 style="margin:0; color:#c084fc;">🤖 Klinische Epikrise &amp; Differenzialdiagnostische Bewertung</h2>
+                <div style="color:var(--text-secondary); font-size:13px; margin-top:4px;">
+                    KI-gestützter diagnostischer Befundbericht &bull; Kriterien der <strong>Selbsthilfe Gruppe Borreliose Hannover</strong>
+                </div>
+            </div>
+            <button onclick="window.print()" class="btn-blast" style="background:#8b5cf6; font-size:13px; padding:8px 18px; cursor:pointer; font-weight:600; display:flex; align-items:center; gap:6px;">
+                🖨️ Bericht drucken / als PDF speichern
+            </button>
+        </div>
+
+        <!-- Proben-Metadaten -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; background:#090d16; padding:12px 16px; border-radius:8px; border:1px solid #1e293b; margin-bottom:20px; font-size:13px;">
+            <div><span style="color:#94a3b8;">Probe / Präfix:</span> <strong style="color:#f8fafc;">{sample_prefix}</strong></div>
+            <div><span style="color:#94a3b8;">Sequenzdaten (Reads):</span> <strong style="color:#38bdf8;">{total_reads:,}</strong></div>
+            <div><span style="color:#94a3b8;">Analysierte Assays:</span> <strong style="color:#34d399;">749 Assays</strong></div>
+            <div><span style="color:#94a3b8;">BLAST nt Validierung:</span> <strong style="color:#a855f7;">{len(blast_confirmed_matches)} Treffer</strong></div>
+        </div>
+
+        <!-- 1. HAUPTBEFUNDE -->
+        <div class="guideline-box" style="margin-bottom:20px;">
+            <h3 style="color:#38bdf8; margin-top:0;">I. Zusammenfassung der Hauptbefunde (Ampel-Status)</h3>
+            <table style="width:100%; border-collapse:collapse; margin-top:10px;">
+                <thead>
+                    <tr style="border-bottom:2px solid #334155; text-align:left; color:#94a3b8; font-size:13px;">
+                        <th style="padding:8px 12px;">Erreger / Gattung</th>
+                        <th style="padding:8px 12px;">Diagnose-Ampel</th>
+                        <th style="padding:8px 12px;">Metagenomik-Signal</th>
+                        <th style="padding:8px 12px;">Klinische Einordnung</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {findings_rows}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 2. KOINFEKTIONEN -->
+        <div class="guideline-box" style="margin-bottom:20px;">
+            <h3 style="color:#38bdf8; margin-top:0;">II. Vektor-übertragene Koinfektions-Konstellation</h3>
+            {"".join(coinfection_alerts)}
+        </div>
+
+        <!-- 3. AMR STATUS -->
+        <div class="guideline-box" style="margin-bottom:20px;">
+            <h3 style="color:#38bdf8; margin-top:0;">III. Antibiotika-Resistenz-Status (AMR-Marker)</h3>
+            {amr_section}
+        </div>
+
+        <!-- 4. EMPFEHLUNGEN -->
+        <div class="guideline-box" style="background:#090d16; border-left:4px solid #10b981; margin-bottom:20px;">
+            <h3 style="color:#34d399; margin-top:0;">IV. Empfehlungen für den behandelnden Arzt &amp; Differenzialdiagnostik</h3>
+            <ul style="color:#cbd5e1; font-size:14px; line-height:1.6; margin:0; padding-left:20px;">
+                <li><strong>Serologische &amp; zelluläre Absicherung:</strong> Bei nachgewiesener Erregerlast wird die Bestätigung via LTT/EliSpot (für <em>Borrelia</em>) bzw. antigenspezifischem Antikörpernachweis (IgG/IgM Immunoblot) empfohlen.</li>
+                <li><strong>Erythrozytäre &amp; Endotheliale Diagnostik:</strong> Bei Babesien- oder Bartonellen-Signalen Überprüfung des Blutbilds (Hämolyseparameter: LDH, Haptoglobin, Retikulozyten) und ggf. PCR/Dunkelfeldmikroskopie.</li>
+                <li><strong>Begleitparameter &amp; Immunsystem:</strong> Bestimmung des zellulären Immunstatus (CD57+ NK-Zellzahl, TNF-alpha, IL-6), um sekundäre Immundysfunktionen rechtzeitig zu adressieren.</li>
+                <li><strong>Therapeutische Berücksichtigung:</strong> Beachtung der intrazellulären Penetration und Erregerspezifität gewählter Wirkstoffe (Doxycyclin vs. Makrolide vs. Atovaquon).</li>
+            </ul>
+        </div>
+
+        <!-- Rechtlicher Disclaimer -->
+        <div style="font-size:11px; color:#64748b; border-top:1px solid #334155; padding-top:12px; margin-top:12px;">
+            <em>Rechtlicher Hinweis: Dieser KI-gestützte Befundbericht dient wissenschaftlichen und diagnostikunterstützenden Zwecken und basiert auf bioinformatischem In-Silico-Matching sowie Erfahrungswerten der SHG Borreliose Hannover. Er ersetzt nicht die abschließende klinische Diagnosestellung und Therapieentscheidung durch die behandelnde Ärztin oder den behandelnden Arzt.</em>
+        </div>
+    </div>
+    """
+    return html
+
+
 def generate_html_dashboard(results, dashboard_path):
     """
     Generates the modern 5-Tab Interactive Pathogen Discovery & Clinical Diagnosis Dashboard.
@@ -2216,6 +2431,16 @@ def generate_html_dashboard(results, dashboard_path):
             extracted_counts=extracted_counts
         )
         results['clinical_findings'] = clinical_findings
+
+    ai_report_html = generate_ai_medical_report_html(
+        fastq_name=fastq_name,
+        sample_prefix=sample_prefix,
+        total_reads=total_reads,
+        clinical_findings=clinical_findings,
+        blast_confirmed_matches=results.get('blast_confirmed_genus_matches', []),
+        primer_stats=primer_stats,
+        human_dna_pct=results.get('human_dna_pct', None)
+    )
 
     confirmed_count = sum(1 for c in clinical_findings if c['status'] == 'confirmed')
     suspect_count = sum(1 for c in clinical_findings if c['status'] == 'suspect')
@@ -2833,6 +3058,7 @@ def generate_html_dashboard(results, dashboard_path):
         <button class="tab-btn" onclick="switchTab('tab-blast-confirmed', this)" style="border-left: 3px solid #10b981;">
             🎯 BLAST-Bestaetigt (Genus) <span class="badge badge-both" style="font-size:11px; padding:2px 7px; margin-left:4px;">{blast_confirmed_count}</span>
         </button>
+        <button class="tab-btn" onclick="switchTab('tab-ai-report', this)" style="border-left: 3px solid #8b5cf6;">🤖 KI-Arztbericht &amp; Epikrise</button>
         <button class="tab-btn" onclick="switchTab('tab-primers', this)">📊 Detaillierte Primer-Matrix (738 Assays)</button>
         <button class="tab-btn" onclick="switchTab('tab-denovo', this)">🔬 De-novo Entdeckungen (Dark Matter: {denovo_count})</button>
         <button class="tab-btn" onclick="switchTab('tab-amplicons', this)">📁 Extrahierte Amplikons ({len(extracted_counts)})</button>
@@ -2946,6 +3172,12 @@ def generate_html_dashboard(results, dashboard_path):
         </div>
     </div>
 
+    
+    <!-- TAB: KI-ARZTBERICHT & EPIKRISE -->
+    <div id="tab-ai-report" class="tab-pane">
+        {ai_report_html}
+    </div>
+
     <!-- TAB 2: PRIMER MATRIX (738 ASSAYS) -->
     <div id="tab-primers" class="tab-pane">
         <div class="charts-row" style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
@@ -2962,6 +3194,7 @@ def generate_html_dashboard(results, dashboard_path):
                 <button class="filter-btn" style="border-left:3px solid #ef4444;" onclick="filterTableByTier('1', this, 'primerTable')">Tier 1: Borreliose &amp; Vektor</button>
                 <button class="filter-btn" style="border-left:3px solid #0284c7;" onclick="filterTableByTier('2', this, 'primerTable')">Tier 2: Endokarditis &amp; Sepsis</button>
                 <button class="filter-btn" style="border-left:3px solid #64748b;" onclick="filterTableByTier('3', this, 'primerTable')">Tier 3: Weitere</button>
+            <button class="filter-btn" style="border-left:3px solid #f59e0b;" onclick="filterTableByTier('AMR', this, 'primerTable')">Tier AMR: Resistenzen</button>
             </div>
             <table id="primerTable">
                 <thead>
@@ -5696,6 +5929,8 @@ FLAG-ERKLÄRUNGEN:
                         help="Aktiviert das automatische De-novo-Assembly und den lokalen BLASTn-Abgleich unzugeordneter Reads zur Entdeckung unbekannter/unerwarteter Erreger (Standard: aktiv)")
     parser.add_argument("--no-discover-unknown", dest="discover_unknown", action="store_false",
                         help="Deaktiviert die De-novo-Entdeckung unbekannter Erreger")
+    parser.add_argument("--filter-human", "--deplete-human", action="store_true", default=False,
+                        help="Filtert menschliche Wirts-DNA (GRCh38/T2T) optional vorab via minimap2 heraus und dokumentiert den Wirtsanteil im QC-Bericht.")
     parser.add_argument("--pan-scan", "--pan-pathogen-scan", action="store_true",
                         help="Führt einen globalen minimap2-Scan aller Reads gegen alle 340+ Pathogen-Referenzgenome durch (Paket B)")
     parser.add_argument("--threads", "-t", type=int, default=None,

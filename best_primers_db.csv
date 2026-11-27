@@ -737,3 +737,14 @@ Pan-Flaviviridae (NS5/RdRp consensus),Pan_Flavivirus_NS5_cFD2_FS778,GTGTCCCAGCCG
 Babesia odocoilei,Babesia_odocoilei_18S_Scott_BJ1_BN2,GTCTTGTAATTGGAATGATGG,TAGTTTATGGTTAGGACTACG,Tier 1,18S,488,Scott et al. (2021) Diagnostics 11(7):1265 (Human Babesia odocoilei)
 Babesia odocoilei,Babesia_odocoilei_18S_Armstrong_Bo18S,CGATTTCTGGGTTCGATTCC,ACAGACCTGTTATTGCCTC,Tier 1,18S,345,Armstrong et al. (2014) J Clin Microbiol 52(9):3416-3420
 Babesia odocoilei,Babesia_odocoilei_18S_V4_BodoV4,GGCTTAATTTGACTCAACACGGG,CCGCTTTCGAACATTCGGTTTC,Tier 1,18S-V4,385,Scott et al. (2021) Healthcare (Basel) 9(12):1640
+AMR: Tetracyclin/Doxycyclin (tetM),AMR_Doxycycline_tetM,GTGGAAACAGGTGAATGTAG,CTAATAGCGCTGCTAACAAC,Tier AMR,tetM_ribosomal_protection,406,Ng et al. 2001 (PMID: 11207188)
+AMR: Tetracyclin/Doxycyclin (tetK),AMR_Doxycycline_tetK,TATTTTGGCGTTACTCTTGC,TGAATAGAAGCCTTTCTTTTTT,Tier AMR,tetK_efflux_pump,360,Trzcinski et al. 2000
+AMR: Tetracyclin/Doxycyclin (tetA),AMR_Doxycycline_tetA,GTGAAACCAATCAAGGGGTC,CCCTTTCCTTTGTCGTTTTC,Tier AMR,tetA_efflux_pump,210,Guardabassi et al. 2000
+AMR: Makrolid/Azithromycin (ermB),AMR_Macrolide_ermB,GAAAAGGTACTCAACCAAATA,AGTAACGGTACTTAAATTGTTTAC,Tier AMR,ermB_rRNA_methyltransferase,639,Sutcliffe et al. 1996 (PMID: 8904533)
+AMR: Makrolid/Azithromycin (ermA),AMR_Macrolide_ermA,TATCTTATCGTTGAGAAGGGATT,CTACACTTGGCTTAGGATGAAA,Tier AMR,ermA_rRNA_methyltransferase,190,Lina et al. 1999
+AMR: Makrolid/Azithromycin (23S rRNA),AMR_Macrolide_23S_A2058G,CGGTCCTCTCGTACTAGGAG,AGCCCACGTCACCCCACCAC,Tier AMR,23S_rRNA_peptidyltransferase,295,Bébéar et al. 2003 (PMID: 12760888)
+AMR: Fluorchinolon/Ciprofloxacin (gyrA),AMR_Fluoroquinolone_gyrA,TACACCTGACGTTCGAGACG,AATTTCGGCACCACTCATCA,Tier AMR,gyrA_QRDR_region,344,Weigel et al. 2002
+AMR: Fluorchinolon/Levofloxacin (parC),AMR_Fluoroquinolone_parC,GTTGGTGACGTAATCGGTAA,CATCGGCATACTTTTCGTTC,Tier AMR,parC_QRDR_region,260,Gibreel et al. 2004
+AMR: Beta-Laktam/Amoxicillin (blaTEM),AMR_BetaLactam_blaTEM,ATGAGTATTCAACATTTCCG,CCAATGCTTAATCAGTGAGG,Tier AMR,blaTEM_beta_lactamase,840,Colom et al. 2003
+AMR: Beta-Laktam/Cephalosporin (blaSHV),AMR_BetaLactam_blaSHV,TTAACTCCCTGTTAGCCACC,GATTTGCTGATTTCGCTCGG,Tier AMR,blaSHV_beta_lactamase,795,Nüesch-Inderbinen et al. 1997
+AMR: Rifampicin (rpoB RRDR),AMR_Rifampicin_rpoB,TACGGTCGGCGAGCTGATCC,ACGACGTGGGTCAGGGTGCA,Tier AMR,rpoB_rifampicin_determining_region,255,Telenti et al. 1993
