@@ -70,9 +70,6 @@ python primer_suche.py -i sample.fastq.gz --tier 0,1 -a -t 24
 - **Multi-Sample Overview (`primer_overview_dashboard.html`):**
   - Cross-sample pathogen heatmaps, comparative bar charts, and multi-locus presence matrix.
 
-- **Example Report:**
-  - An interactive sample primer dashboard is available under [`examples/js_5600180_primer_dashboard_js.html`](examples/js_5600180_primer_dashboard_js.html).
-
 ---
 
 ## 🛠️ Requirements
