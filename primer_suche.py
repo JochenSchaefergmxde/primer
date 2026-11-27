@@ -166,6 +166,13 @@ def classify_primer_taxa(org_name, pair_id):
     first_word = words[0] if words else 'Unknown'
     clean_genus = first_word.replace('/', '').replace('(', '').replace(')', '').strip()
     
+    if any(u in org.lower() for u in ['universal fungi', 'fungi']):
+        clean_genus = 'Fungi'
+    elif any(u in org.lower() for u in ['universal bacteria', 'bacteria']):
+        clean_genus = 'Bacteria'
+    elif any(u in org.lower() for u in ['universal protozoa', 'protozoa', 'apicomplexa']):
+        clean_genus = 'Protozoa'
+
     is_genus = False
     if len(words) == 1:
         is_genus = True
@@ -1350,7 +1357,29 @@ def run_local_blast_verification(validations, output_dir, prefix, blast_db="/mnt
 
                 # Filter human / vector false matches
                 if not any(ex in title_lower for ex in ['homo sapiens', 'human', 'synthetic construct', 'cloning vector']):
-                    if org_clean in title_lower or (len(org_clean.split()) >= 2 and all(w in title_lower for w in org_clean.split()[:2])):
+                    # Universal / Broad-range Assays: Dynamisch tatsächliche Spezies/Genus aus dem BLAST-Titel ermitteln
+                    if any(u in org_clean for u in ['universal fungi', 'fungi', 'its2', 'its1']):
+                        title_words = clean_title.split()
+                        cand_genus = title_words[0] if title_words else "Fungi"
+                        cand_species = " ".join(title_words[:2]) if len(title_words) >= 2 else cand_genus
+                        genus_confirmed = True
+                        confirm_level = f"Spezies-Bestaetigt (Fungi: {cand_species})"
+                        genus = cand_genus
+                    elif any(u in org_clean for u in ['universal bacteria', '16s']):
+                        title_words = clean_title.split()
+                        cand_genus = title_words[0] if title_words else "Bacteria"
+                        cand_species = " ".join(title_words[:2]) if len(title_words) >= 2 else cand_genus
+                        genus_confirmed = True
+                        confirm_level = f"Spezies-Bestaetigt (Bakt: {cand_species})"
+                        genus = cand_genus
+                    elif any(u in org_clean for u in ['universal protozoa', 'apicomplexa', '18s']):
+                        title_words = clean_title.split()
+                        cand_genus = title_words[0] if title_words else "Protozoa"
+                        cand_species = " ".join(title_words[:2]) if len(title_words) >= 2 else cand_genus
+                        genus_confirmed = True
+                        confirm_level = f"Spezies-Bestaetigt (Protozoa: {cand_species})"
+                        genus = cand_genus
+                    elif org_clean in title_lower or (len(org_clean.split()) >= 2 and all(w in title_lower for w in org_clean.split()[:2])):
                         genus_confirmed = True
                         confirm_level = "Spezies-Bestaetigt"
                     elif genus_lower in title_lower:
