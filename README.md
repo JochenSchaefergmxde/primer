@@ -8,7 +8,7 @@ Developed in collaboration with diagnostic experience values from **Selbsthilfe 
 
 ## 🔬 Core Capabilities
 
-1. **738 Curated Diagnostic Assays (`best_primers_db.csv`)**:
+1. **756 Curated Diagnostic Assays (`best_primers_db.csv`)**:
    - **Tier 0:** Universal broad-range barcoding (Pan-Bacteria 16S / rpoB, Pan-Fungi ITS / 28S, Pan-Protozoa 18S, Pan-Flavivirus, Pan-Herpes).
    - **Tier 1:** Borreliosis and vector-borne coinfections (*Borrelia burgdorferi sensu lato*, *Borrelia miyamotoi*, *Babesia microti/divergens/odocoilei/venatorum*, *Plasmodium*, *Bartonella*, *Rickettsia*, *Anaplasma*, *Ehrlichia*).
    - **Tier 2:** Endocarditis, atypical bacterial pathogens (*Mycoplasma*, *Mycobacterium*, *Brucella*, *Coxiella*, *Francisella*, *Tropheryma whipplei*, NVS).
@@ -62,7 +62,7 @@ python primer_suche.py -i sample.fastq.gz --tier 0,1 -a -t 24
 - **Single-Sample Dashboard (`primer_dashboard_<prefix>.html`):**
   - Tab 1: 🏥 Clinical Findings & Traffic Light Status
   - Tab 2: 🎯 BLAST-Confirmed Matches (Genus & Species)
-  - Tab 3: 📊 Detailed Primer Matrix (738 Assays with 1-Click NCBI Web-BLAST)
+  - Tab 3: 📊 Detailed Primer Matrix (756 Assays with 1-Click NCBI Web-BLAST)
   - Tab 4: 🔬 De-novo Discoveries (Dark Matter Contigs)
   - Tab 5: 📁 Extracted Amplicons
   - Tab 6: 📖 Clinical Guidelines & CLI Documentation (SHG Borreliose Hannover)

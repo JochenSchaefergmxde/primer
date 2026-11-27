@@ -748,3 +748,10 @@ AMR: Fluorchinolon/Levofloxacin (parC),AMR_Fluoroquinolone_parC,GTTGGTGACGTAATCG
 AMR: Beta-Laktam/Amoxicillin (blaTEM),AMR_BetaLactam_blaTEM,ATGAGTATTCAACATTTCCG,CCAATGCTTAATCAGTGAGG,Tier AMR,blaTEM_beta_lactamase,840,Colom et al. 2003
 AMR: Beta-Laktam/Cephalosporin (blaSHV),AMR_BetaLactam_blaSHV,TTAACTCCCTGTTAGCCACC,GATTTGCTGATTTCGCTCGG,Tier AMR,blaSHV_beta_lactamase,795,Nüesch-Inderbinen et al. 1997
 AMR: Rifampicin (rpoB RRDR),AMR_Rifampicin_rpoB,TACGGTCGGCGAGCTGATCC,ACGACGTGGGTCAGGGTGCA,Tier AMR,rpoB_rifampicin_determining_region,255,Telenti et al. 1993
+Candida glabrata (Nakaseomyces glabratus),Candida_glabrata_ITS2_spec,TTGGTCCGGCCGAGTTGGTG,TCGCTATGGTGCTCCGGGCT,Tier 2,ITS2,280,Hsu et al. 2003 (PMID: 12878652)
+Candida krusei (Pichia kudriavzevii),Candida_krusei_ITS2_spec,CTCCGTTGTTGAAAGTTTTGATT,AGCTCAGTCGTTCCCGGTGG,Tier 2,ITS2,185,Hsu et al. 2003 / Kanbe et al. 2002
+Candida parapsilosis,Candida_parapsilosis_ITS2_spec,GCTCGTTCCTCGGTCCGTTG,TCTCTCGGTCAAAGTTCGTGG,Tier 2,ITS2,210,Hsu et al. 2003 (PMID: 12878652)
+Lichtheimia corymbifera (Mucormycosis),Lichtheimia_corymbifera_18S_Lich1,ATTCAGGAACAGCTCGTTAC,GACTTCGCTTTCGTTCGTTG,Tier 3,18S_rRNA,170,Kasai et al. 2008 (PMID: 18832128)
+Rhizomucor pusillus (Mucormycosis),Rhizomucor_pusillus_18S_Rhp1,TGAACTGTACGGTGAGACGC,ACCTCAGTCTCAACGGTCGA,Tier 3,18S_rRNA,165,Kasai et al. 2008 (PMID: 18832128)
+Exophiala dermatitidis (Black yeast),Exophiala_dermatitidis_ITS_spec,TGTGCCTCTTTTCTGGTCTG,CCAAGCACATACTTACTCGG,Tier 3,ITS2,225,Gerrits van den Ende et al. 1999
+Cladophialophora bantiana (Cerebral phaeohyphomycosis),Cladophialophora_bantiana_ITS2_spec,CGGTGTTCGGTTGGTTGGTG,TGCTCTGCCGTCACTGTCCA,Tier 3,ITS2,195,Abliz et al. 2004

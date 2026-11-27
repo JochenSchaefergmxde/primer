@@ -2344,7 +2344,7 @@ def generate_ai_medical_report_html(fastq_name, sample_prefix, total_reads, clin
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; background:#090d16; padding:12px 16px; border-radius:8px; border:1px solid #1e293b; margin-bottom:20px; font-size:13px;">
             <div><span style="color:#94a3b8;">Probe / Präfix:</span> <strong style="color:#f8fafc;">{sample_prefix}</strong></div>
             <div><span style="color:#94a3b8;">Sequenzdaten (Reads):</span> <strong style="color:#38bdf8;">{total_reads:,}</strong></div>
-            <div><span style="color:#94a3b8;">Analysierte Assays:</span> <strong style="color:#34d399;">749 Assays</strong></div>
+            <div><span style="color:#94a3b8;">Analysierte Assays:</span> <strong style="color:#34d399;">756 Assays</strong></div>
             <div><span style="color:#94a3b8;">BLAST nt Validierung:</span> <strong style="color:#a855f7;">{len(blast_confirmed_matches)} Treffer</strong></div>
         </div>
 
@@ -2402,7 +2402,7 @@ def generate_html_dashboard(results, dashboard_path):
     """
     Generates the modern 5-Tab Interactive Pathogen Discovery & Clinical Diagnosis Dashboard.
     Tab 1: Klinischer Erreger-Befund (Diagnose-Ampel & Multi-Locus Accordion)
-    Tab 2: Detaillierte Primer-Matrix (735 Assays & Amplikons)
+    Tab 2: Detaillierte Primer-Matrix (756 Assays & Amplikons)
     Tab 3: De-novo Entdeckungen (Unbekannte Erreger & Dark Matter)
     Tab 4: Qualitaetskontrolle & Kontaminanten (Kitome / Human)
     Tab 5: Vorgehen & Leitfaden (SHG Borreliose Hannover)
@@ -3059,7 +3059,7 @@ def generate_html_dashboard(results, dashboard_path):
             🎯 BLAST-Bestaetigt (Genus) <span class="badge badge-both" style="font-size:11px; padding:2px 7px; margin-left:4px;">{blast_confirmed_count}</span>
         </button>
         <button class="tab-btn" onclick="switchTab('tab-ai-report', this)" style="border-left: 3px solid #8b5cf6;">🤖 KI-Arztbericht &amp; Epikrise</button>
-        <button class="tab-btn" onclick="switchTab('tab-primers', this)">📊 Detaillierte Primer-Matrix (738 Assays)</button>
+        <button class="tab-btn" onclick="switchTab('tab-primers', this)">📊 Detaillierte Primer-Matrix (756 Assays)</button>
         <button class="tab-btn" onclick="switchTab('tab-denovo', this)">🔬 De-novo Entdeckungen (Dark Matter: {denovo_count})</button>
         <button class="tab-btn" onclick="switchTab('tab-amplicons', this)">📁 Extrahierte Amplikons ({len(extracted_counts)})</button>
         <button class="tab-btn" onclick="switchTab('tab-guidelines', this)">📖 Leitfaden (SHG Borreliose Hannover)</button>
@@ -3186,7 +3186,7 @@ def generate_html_dashboard(results, dashboard_path):
         </div>
 
         <div class="card">
-            <h2>Detaillierte Primer Treffer Uebersicht (735 Assays)</h2>
+            <h2>Detaillierte Primer Treffer Uebersicht (756 Assays)</h2>
             <div style="display:flex; gap:8px; margin: 10px 0 16px 0; flex-wrap:wrap; align-items:center;">
                 <span style="font-size:12px; font-weight:600; color:var(--text-secondary);">Filter nach Tier:</span>
                 <button class="filter-btn active" onclick="filterTableByTier('all', this, 'primerTable')">Alle Assays</button>
@@ -3290,7 +3290,7 @@ def generate_html_dashboard(results, dashboard_path):
                         <br>&bull; <span class="badge badge-none" style="font-size:11px;">🚫 Kitom / Kontaminant</span>: Typische Labor- oder Extraktionskit-Flora (z.B. Ralstonia, Cutibacterium) – per Button ausblendbar.
                     </li>
                     <li><strong style="color:#38bdf8;">🎯 BLAST-Bestätigt (Genus):</strong> Exklusive Spezialansicht! Zeigt nur diejenigen Funde, bei denen die <em>lokale BLASTn-Suche</em> (/mnt/blast_db/nt) die Gattung oder Spezies unabhängig bestätigt hat (inkl. E-Value, Identität % und Alignment-Länge).</li>
-                    <li><strong style="color:#a855f7;">📊 Detaillierte Primer-Matrix (738 Assays):</strong> (Aufrufbar über den <em>Primer-Button</em> oben!) Vollständige Auflistung aller 738 diagnostischen Assays mit genauen FWD-, REV- und Doppelstrang-Treffern, sortierbar und filterbar nach Tiers.</li>
+                    <li><strong style="color:#a855f7;">📊 Detaillierte Primer-Matrix (756 Assays):</strong> (Aufrufbar über den <em>Primer-Button</em> oben!) Vollständige Auflistung aller 738 diagnostischen Assays mit genauen FWD-, REV- und Doppelstrang-Treffern, sortierbar und filterbar nach Tiers.</li>
                     <li><strong style="color:#06b6d4;">🔬 De-novo Entdeckungen (Dark Matter):</strong> Zeigt neue oder unerwartete Erreger, die aus nicht-gemappten Reads de-novo zu Contigs assembliert und via lokalem BLAST identifiziert wurden.</li>
                     <li><strong style="color:#f59e0b;">📁 Extrahierte Amplikons:</strong> Physisch aus den Reads ausgeschnittene PCR-Produkte (inkl. Längenverteilung) mit 1-Click-Web-BLAST.</li>
                 </ul>
@@ -3303,8 +3303,8 @@ def generate_html_dashboard(results, dashboard_path):
                     Im Dashboard begegnet Ihnen der Begriff <strong>Primer-Button</strong> an zwei zentralen Stellen:
                 </p>
                 <ol style="margin-bottom:12px;">
-                    <li><strong>Der Tab-Button &bdquo;📊 Detaillierte Primer-Matrix (738 Assays)&ldquo; im Menüband:</strong>
-                        <br>Dieser Navigations-Button schaltet die Ansicht vom komprimierten klinischen Befund auf die vollständige, wissenschaftliche Rohdaten-Tabelle um. Dort sehen Sie jedes der 738 Primerpaare mit:
+                    <li><strong>Der Tab-Button &bdquo;📊 Detaillierte Primer-Matrix (756 Assays)&ldquo; im Menüband:</strong>
+                        <br>Dieser Navigations-Button schaltet die Ansicht vom komprimierten klinischen Befund auf die vollständige, wissenschaftliche Rohdaten-Tabelle um. Dort sehen Sie jedes der 756 Primerpaare mit:
                         <ul style="margin-top:4px;">
                             <li>Genauer Anzahl der FWD-Reads, REV-Reads und beidseitigen Amplikons (BOTH).</li>
                             <li>Basenpaar-Abstand (Amplikon-Größe in bp) und Übereinstimmung mit der Zielregion.</li>
@@ -4392,7 +4392,7 @@ def generate_summary_html_dashboard(all_sample_results, overview_dashboard_path)
                         <br>&bull; <span class="badge badge-none" style="font-size:11px;">🚫 Kitom / Kontaminant</span>: Typische Labor- oder Extraktionskit-Flora (z.B. Ralstonia, Cutibacterium) – per Button ausblendbar.
                     </li>
                     <li><strong style="color:#38bdf8;">🎯 BLAST-Bestätigt (Genus):</strong> Exklusive Spezialansicht! Zeigt nur diejenigen Funde, bei denen die <em>lokale BLASTn-Suche</em> (/mnt/blast_db/nt) die Gattung oder Spezies unabhängig bestätigt hat (inkl. E-Value, Identität % und Alignment-Länge).</li>
-                    <li><strong style="color:#a855f7;">📊 Detaillierte Primer-Matrix (738 Assays):</strong> (Aufrufbar über den <em>Primer-Button</em> oben!) Vollständige Auflistung aller 738 diagnostischen Assays mit genauen FWD-, REV- und Doppelstrang-Treffern, sortierbar und filterbar nach Tiers.</li>
+                    <li><strong style="color:#a855f7;">📊 Detaillierte Primer-Matrix (756 Assays):</strong> (Aufrufbar über den <em>Primer-Button</em> oben!) Vollständige Auflistung aller 738 diagnostischen Assays mit genauen FWD-, REV- und Doppelstrang-Treffern, sortierbar und filterbar nach Tiers.</li>
                     <li><strong style="color:#06b6d4;">🔬 De-novo Entdeckungen (Dark Matter):</strong> Zeigt neue oder unerwartete Erreger, die aus nicht-gemappten Reads de-novo zu Contigs assembliert und via lokalem BLAST identifiziert wurden.</li>
                     <li><strong style="color:#f59e0b;">📁 Extrahierte Amplikons:</strong> Physisch aus den Reads ausgeschnittene PCR-Produkte (inkl. Längenverteilung) mit 1-Click-Web-BLAST.</li>
                 </ul>
@@ -4405,8 +4405,8 @@ def generate_summary_html_dashboard(all_sample_results, overview_dashboard_path)
                     Im Dashboard begegnet Ihnen der Begriff <strong>Primer-Button</strong> an zwei zentralen Stellen:
                 </p>
                 <ol style="margin-bottom:12px;">
-                    <li><strong>Der Tab-Button &bdquo;📊 Detaillierte Primer-Matrix (738 Assays)&ldquo; im Menüband:</strong>
-                        <br>Dieser Navigations-Button schaltet die Ansicht vom komprimierten klinischen Befund auf die vollständige, wissenschaftliche Rohdaten-Tabelle um. Dort sehen Sie jedes der 738 Primerpaare mit:
+                    <li><strong>Der Tab-Button &bdquo;📊 Detaillierte Primer-Matrix (756 Assays)&ldquo; im Menüband:</strong>
+                        <br>Dieser Navigations-Button schaltet die Ansicht vom komprimierten klinischen Befund auf die vollständige, wissenschaftliche Rohdaten-Tabelle um. Dort sehen Sie jedes der 756 Primerpaare mit:
                         <ul style="margin-top:4px;">
                             <li>Genauer Anzahl der FWD-Reads, REV-Reads und beidseitigen Amplikons (BOTH).</li>
                             <li>Basenpaar-Abstand (Amplikon-Größe in bp) und Übereinstimmung mit der Zielregion.</li>
@@ -5847,7 +5847,7 @@ BEISPIELE & PRAXIS-WORKFLOWS (COMMAND LINE GUIDE)
 ================================================================================
 
 1. KLINISCHER GOLDSTANDARD (Empfohlene Routine-Vollanalyse):
-   Durchsucht alle 738 Assays (inkl. aller Babesien, Plasmodien, Borrelien, Bartonellen etc.)
+   Durchsucht alle 756 Assays (inkl. aller Babesien, Plasmodien, Borrelien, Bartonellen etc.)
    kombiniert mit globalem Vollgenom-Mapping (--pan-scan) gegen 340+ Pathogene und 
    automatischer De-novo-Entdeckung unbekannter Erreger:
    $ python primer_suche.py -i probe.fastq.gz -a --pan-scan -t 24
@@ -5887,7 +5887,7 @@ BEISPIELE & PRAXIS-WORKFLOWS (COMMAND LINE GUIDE)
 
 ================================================================================
 FLAG-ERKLÄRUNGEN:
-  -a, --all              Testet ALLE 738 Assays in der Datenbank (kein Filter)
+  -a, --all              Testet ALLE 756 Assays in der Datenbank (kein Filter)
   --pan-scan             Aktiviert Vollgenom-Mapping via minimap2 gegen 340+ Referenzgenome
   -gs, --hierarchical    2-Stufen-Modus: Erst Genus-Marker prüfen, nur bei Hit Spezies testen
   -g, --genus            Nur Genus-Screening-Primer testen
